@@ -1,7 +1,7 @@
 import numpy as np
 import sklearn as sk
 import h5py as hp
-fp = hp.File('path/to/file.h5', 'r')
+fp = hp.File('/Users/Hannah/Desktop/???/work/spring2021/exploreCSR/other/mini-imagenet-test_v2.h5', 'r')
 
 """
 1. create episodes: 5-shot, 5-way
@@ -24,4 +24,4 @@ def episode_performance():
     print("HELLO")
 
 if __name__ == '__main__':
-    print("HELLO")
+    print("HI")
