@@ -2,6 +2,7 @@ import h5py as hp
 import random as rm
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.utils import shuffle
 
 """
 1. create episodes: 5-shot, 5-way
@@ -33,9 +34,10 @@ def episode( file_pointer ):
 
     # for each of five classes...
     for c in five_classes:
+
         # get images associated with class and shuffle order
         images = file_pointer.get( c )
-        # rm.shuffle( images )
+        # shuffle( images )
 
         # select disjoint support and query set
         support = list()
@@ -56,7 +58,7 @@ def episode( file_pointer ):
     for q in query_list:
         current_scores = list()
         for p in proto_list:
-            score = cosine_similarity( q, p )
+            score = cosine_similarity( p, q )
             current_scores.append( score )
         # END for each
 
