@@ -54,12 +54,21 @@ def episode(file_pointer):
         query_list.append(query)
     # END for each
 
+    # adjust array dimensions of proto_list and query_list
+    prototypes = np.asarray(proto_list).reshape([5, -1])
+    all_queries = query_list[0] + query_list[1] + query_list[2] + query_list[3] + query_list[4]
+    queries = np.asarray(all_queries)
+    queries = np.reshape(queries, [75, -1])
+
+    q_label = 0
     correctness = 0
     # compare query images against prototypes
-    for q in query_list:
+    for q in queries:
+        new_q = np.reshape(q, [1, -1])
         current_scores = list()
-        for p in proto_list:
-            score = cosine_similarity(p, q)
+        for p in prototypes:
+            new_p = np.reshape(p, [1, -1])
+            score = cosine_similarity(new_q, new_p)
             current_scores.append(score)
         # END for each
 
@@ -67,8 +76,10 @@ def episode(file_pointer):
         prediction = current_scores.index(max(current_scores))
 
         # compare actual label with prediction
-        if query_list.index(q) == prediction:
+        if q_label == prediction:
             correctness += 1
+
+        q_label += 1
     # END for each
 
     # compute and return accuracy
@@ -85,8 +96,9 @@ if __name__ == '__main__':
     # populate list of accuracies
     accuracies = list()
     for i in range(800):
+        print("Round: " + str(i))
         accuracies.append(episode(fp))
 
     # average across accuracies (should be around 80%)
-    mean_acc = np.mean(accuracies)
-    print("Accuracy: " + mean_acc)
+    mean_acc = np.average(accuracies)
+    print("Accuracy: " + str(mean_acc))
