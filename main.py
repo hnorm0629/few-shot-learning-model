@@ -1,5 +1,5 @@
 import h5py as hp
-import random as rm
+import random
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -20,11 +20,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 10. return the accuracy
 """
 
-def episode( file_pointer ):
 
+def episode(file_pointer):
     # gather class names and choose 5 random
-    class_names = list( file_pointer.keys() )
-    five_classes = rm.sample( class_names, 5 )
+    class_names = list(file_pointer.keys())
+    five_classes = random.sample(class_names, 5)
 
     # initialize support and query sets & labels
     proto_list = list()
@@ -34,25 +34,24 @@ def episode( file_pointer ):
     # for each of five classes...
     for c in five_classes:
         # get images associated with class and shuffle order
-        images = file_pointer.get( c )
-        images_i = list( range( 0, len( images ) ))
-        rm.shuffle( images_i )
-
-        #images = file_pointer.create_dataset( c, shape=(600, 16000), dtype='f4', chunks=True)
-        # images.resize( 600, 16000 )
+        images = file_pointer.get(c)[:]
+        images_j = list(range(0, len(images)))
+        random.shuffle(images_j)
 
         # select disjoint support and query set
         support = list()
         query = list()
-        for i in range(0, 5): support.append( images[images_i[i]] )
-        for i in range(5, 20): query.append( images[images_i[i]] )
+        for j in range(0, 5):
+            support.append(images[images_j[j]])
+        for j in range(5, 20):
+            query.append(images[images_j[j]])
 
         # average over support set for prototype
-        prototype = np.mean( support, axis=0 )
+        prototype = np.mean(support, axis=0)
 
         # update prototype list and query list
-        proto_list.append( prototype )
-        query_list.append( query )
+        proto_list.append(prototype)
+        query_list.append(query)
     # END for each
 
     correctness = 0
@@ -60,21 +59,22 @@ def episode( file_pointer ):
     for q in query_list:
         current_scores = list()
         for p in proto_list:
-            score = cosine_similarity( p, q )
-            current_scores.append( score )
+            score = cosine_similarity(p, q)
+            current_scores.append(score)
         # END for each
 
         # calculate prediction
-        prediction = current_scores.index( max( current_scores ) )
+        prediction = current_scores.index(max(current_scores))
 
         # compare actual label with prediction
-        if query_list.index( q ) == prediction:
+        if query_list.index(q) == prediction:
             correctness += 1
     # END for each
 
     # compute and return accuracy
-    accuracy = correctness / len( query_list )
+    accuracy = correctness / len(query_list)
     return accuracy
+
 
 if __name__ == '__main__':
 
@@ -85,8 +85,8 @@ if __name__ == '__main__':
     # populate list of accuracies
     accuracies = list()
     for i in range(800):
-        accuracies.append( episode( fp ) )
+        accuracies.append(episode(fp))
 
     # average across accuracies (should be around 80%)
-    mean_acc = np.mean( accuracies )
+    mean_acc = np.mean(accuracies)
     print("Accuracy: " + mean_acc)
