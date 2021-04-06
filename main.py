@@ -2,6 +2,7 @@ import h5py as hp
 import random
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import euclidean_distances
 
 
 def episode(file_pointer):
@@ -17,16 +18,20 @@ def episode(file_pointer):
     for c in five_classes:
         # get images associated with class and shuffle order
         images = file_pointer.get(c)[:]
+
+        # average over last two dimensions of images
+        im_mean = np.mean(images, axis=(2, 3))         # change dimensionality
+
         images_j = list(range(0, len(images)))
         random.shuffle(images_j)
 
         # select disjoint support and query set
         support = list()
         query = list()
-        for j in range(0, 5):
-            support.append(images[images_j[j]])
+        for j in range(0, 5):                          # change to 1 for 1-shot
+            support.append(im_mean[images_j[j]])
         for j in range(5, 20):
-            query.append(images[images_j[j]])
+            query.append(im_mean[images_j[j]])
 
         # average over support set for prototype
         prototype = np.mean(support, axis=0)
@@ -51,12 +56,12 @@ def episode(file_pointer):
         current_scores = list()
         for p in prototypes:
             new_p = np.reshape(p, [1, -1])
-            score = cosine_similarity(new_q, new_p)
+            score = cosine_similarity(new_q, new_p)             # change to euclidean_distances
             current_scores.append(score)
         # END for each
 
         # calculate prediction
-        prediction = current_scores.index(max(current_scores))
+        prediction = current_scores.index(max(current_scores))  # if euclidean, change to min
 
         # compare actual label with prediction
         if label == prediction:
